@@ -48,6 +48,7 @@ import org.restlet.data.Disposition;
 import org.restlet.data.Header;
 import org.restlet.data.MediaType;
 import org.restlet.data.Method;
+import org.restlet.data.Range;
 import org.restlet.data.Reference;
 import org.restlet.data.Status;
 import org.restlet.data.Tag;
@@ -133,8 +134,7 @@ public class HeaderUtils {
                     HeaderConstants.HEADER_UPGRADE)));
 
     /**
-     * Adds the entity headers based on the {@link Representation} to the
-     * {@link Series}.
+     * Adds the entity headers based on the {@link Representation} to the {@link Series}.
      * 
      * @param entity
      *            The source entity {@link Representation}.
@@ -173,9 +173,16 @@ public class HeaderUtils {
             // [enddef]
 
             if (entity.getRange() != null) {
-                addHeader(HeaderConstants.HEADER_CONTENT_RANGE,
-                        RangeWriter.write(entity.getRange(), entity.getSize()),
-                        headers);
+                Range range = entity.getRange();
+                if ("bytes".equals(range.getUnitName())) {
+                    addHeader(HeaderConstants.HEADER_CONTENT_RANGE,
+                            RangeWriter.write(range, entity.getSize()),
+                            headers);
+                } else {
+                    addHeader(HeaderConstants.HEADER_CONTENT_RANGE,
+                            RangeWriter.write(range, range.getInstanceSize()),
+                            headers);
+                }
             }
 
             if (entity.getMediaType() != null) {
@@ -293,8 +300,8 @@ public class HeaderUtils {
     }
 
     /**
-     * Adds the entity headers based on the {@link Representation} to the
-     * {@link Series} when a 304 (Not Modified) status is returned.
+     * Adds the entity headers based on the {@link Representation} to the {@link Series} when a 304 (Not Modified)
+     * status is returned.
      * 
      * @param entity
      *            The source entity {@link Representation}.
@@ -318,8 +325,7 @@ public class HeaderUtils {
     }
 
     /**
-     * Adds the headers based on the {@link Request} to the given {@link Series}
-     * .
+     * Adds the headers based on the {@link Request} to the given {@link Series} .
      * 
      * @param request
      *            The {@link Request} to copy the headers from.
@@ -522,8 +528,7 @@ public class HeaderUtils {
 
     // [ifndef gwt] method
     /**
-     * Adds the headers based on the {@link Response} to the given
-     * {@link Series}.
+     * Adds the headers based on the {@link Response} to the given {@link Series}.
      * 
      * @param response
      *            The {@link Response} to copy the headers from.
@@ -952,8 +957,7 @@ public class HeaderUtils {
     }
 
     /**
-     * Returns the content length of the request entity if know,
-     * {@link Representation#UNKNOWN_SIZE} otherwise.
+     * Returns the content length of the request entity if know, {@link Representation#UNKNOWN_SIZE} otherwise.
      * 
      * @return The request content length.
      */
@@ -1040,8 +1044,8 @@ public class HeaderUtils {
     }
 
     /**
-     * Indicates if the given character is a comment text. It means
-     * {@link #isText(int)} returns true and the character is not '(' or ')'.
+     * Indicates if the given character is a comment text. It means {@link #isText(int)} returns true and the character
+     * is not '(' or ')'.
      * 
      * @param character
      *            The character to test.
@@ -1173,8 +1177,8 @@ public class HeaderUtils {
     }
 
     /**
-     * Indicates if the given character is a quoted text. It means
-     * {@link #isText(int)} returns true and {@link #isDoubleQuote(int)} returns
+     * Indicates if the given character is a quoted text. It means {@link #isText(int)} returns true and
+     * {@link #isDoubleQuote(int)} returns
      * false.
      * 
      * @param character
